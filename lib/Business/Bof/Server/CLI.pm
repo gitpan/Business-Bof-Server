@@ -12,28 +12,24 @@ use POE::Component::Server::SOAP;
 use Scalar::Util qw(blessed refaddr);
 use Switch;
 
+use Business::Bof::Server qw(Fw Schedule Session Connection);
 
-use Business::Bof::Server qw(Fw Task Schedule Session Connection);
-
-our $VERSION = 0.06;
+our $VERSION = 0.07;
 our @ISA = qw(Exporter);
 our @EXPORT = qw(run);
 
-our ($conffile, $fw, $fwtask, $expire_after, $tz, $obj_seq, $logger);
+our ($conffile, $fw, $fwschedule, $expire_after, $tz, $obj_seq, $logger);
 
 sub init {
   $fw = new Business::Bof::Server::Fw($conffile);
   Business::Bof::Server::Connection::set_fw($fw);
+  Business::Bof::Server::Task::set_fw($fw);
   my $conf = $fw -> get_serverconfig() ;
+  $fwschedule = new Business::Bof::Server::Schedule();
   _process_conf($conf);
   _start_logger($conf);
   _start_poe($conf);
-  if (defined($conf->{fwdb}{level}) && $conf->{fwdb}{level} > 1) {
-    $fwtask = new Business::Bof::Server::Task();
-    Business::Bof::Server::Connection::set_fwtask($fwtask);
-  }
 }
-
 
 sub _process_conf {
   my $conf = shift;
@@ -71,16 +67,17 @@ sub _start_poe {
   POE::Component::Server::SOAP->new(
     %parms
   );
-  POE::Session->create (
+  my $poe_session = POE::Session->create (
     inline_states => {
       _start => \&setup_service,
       _stop  => \&shutdown_service,
-      houseKeeping => \&houseKeeping,
-      handleTasks => \&handleTasks,
+      houseKeeping => \&house_keeping,
+      handleSchedules => \&handle_schedules,
       setupClass => \&setup_class,
       execMethod => \&exec_method
     }
   );
+  $fwschedule->init_schedules($poe_session);
 }
 
 sub get_parameters {
@@ -101,9 +98,6 @@ Syntax: <server> -ch
 EOT
 }
 
-#
-# service methods
-#
 sub setup_service {
   my $kernel = $_[KERNEL];
   my $name = $fw -> get_serverconfig("name");
@@ -113,7 +107,6 @@ sub setup_service {
   $kernel->post($name, 'ADDMETHOD', $serviceName, 'setupClass');
   $kernel->post($name, 'ADDMETHOD', $serviceName, 'execMethod');
   $kernel->delay('houseKeeping', $fw -> get_serverconfig("housekeepingDelay"));
-  $kernel->delay('handleTasks', $fw -> get_serverconfig("taskDelay")) if $fwtask;
   my $logtext = "$application Server is running on PID $$";
   $logger->info($logtext) if defined($logger);
   print "\n$logtext\n";
@@ -126,41 +119,21 @@ sub shutdown_service {
   $logger->info("Server shutting down") if defined($logger);
 }
 
-sub houseKeeping {
+sub house_keeping {
   my $transaction = $_[ARG0];
   Business::Bof::Server::Session::scrub($expire_after);
   my $kernel = $_[KERNEL];
   $kernel->delay('houseKeeping', $fw -> get_serverconfig("housekeepingDelay"));
 }
 
-sub handleSchedules {
-  my $now = DateTime->now() -> set_time_zone($tz);
-  my $ymd = $now -> ymd;
-  my $hms = $now -> hms;
-  my $fwschedule = new Business::Bof::Server::Schedule();
-  $fwschedule -> dailySchedule($ymd, $hms);
-}
-
-sub handleTasks {
-  my ($kernel, $heap, $transaction) = @_[KERNEL, HEAP, ARG0];
-  handleSchedules();
-  runTasks($heap);
-  $kernel->delay('handleTasks', $fw -> get_serverconfig("taskDelay"));
-}
-
-sub runTasks {
-  my $heap = shift;
-  my $session_id = 0; # Special session!
-  Business::Bof::Server::Session::set_timestamp($session_id, DateTime->now());
-  while (my $task = $fwtask -> getTask({status => 100})) {
-    my $userinfo = $fw->get_userinfo( {user_id => $task->user_id} );
-    Business::Bof::Server::Session::set_userinfo($session_id, $userinfo);
-    my ($class, $method) = split/\//, $task->{function};
-    my $data;
-    eval '$data=' . $task->{data};
-    my $fw_task = $task->{task_id};
-    startTask($heap, $session_id,$class,$method,$data,$fw_task);
-  }
+sub handle_schedules {
+  my $session_id = 0;
+  my %parms = (
+    class => $_[ARG2],
+    method => $_[ARG3],
+    data => $_[ARG4]
+  );
+  Business::Bof::Server::Connection::call_method($session_id, \%parms);
 }
 
 sub setup_class {

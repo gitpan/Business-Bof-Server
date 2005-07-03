@@ -68,26 +68,17 @@ package Business::Bof::Data::Fw::fw_schedule;
   Business::Bof::Data::Fw::fw_schedule->columns(All => qw/
   	schedule_id
 	title
-	schedtype
 	schedule
 	user_id
-	function
+	class
+        method
 	parameters
-	result
-	resulttype
-	lastrun
 	updated
   /);
+
   Business::Bof::Data::Fw::fw_schedule->columns(Primary => 'schedule_id');
-  Business::Bof::Data::Fw::fw_schedule->sequence('fw_schedulesequence');
+#  Business::Bof::Data::Fw::fw_schedule->sequence('fw_schedulesequence');
   Business::Bof::Data::Fw::fw_schedule->has_a(user_id => PREFIX.'::fw_user');
-
-  Business::Bof::Data::Fw::fw_schedule->add_constructor(schedlist => qq{
-    schedtype = ?
-    AND ?::time >= schedule::time
-    AND (lastrun IS null OR date_trunc(?, lastrun) < ?)
-  });
-
 
 package Business::Bof::Data::Fw::fw_task;
   use constant PREFIX => "Business::Bof::Data::Fw";
@@ -97,7 +88,8 @@ package Business::Bof::Data::Fw::fw_task;
   	task_id
 	user_id
 	transaction_id
-	function
+	class
+	method
 	title
 	parameters
 	result
@@ -106,7 +98,7 @@ package Business::Bof::Data::Fw::fw_task;
 	updated
   /);
   Business::Bof::Data::Fw::fw_task->columns(Primary => 'task_id');
-  Business::Bof::Data::Fw::fw_task->sequence('fw_tasksequence');
+#  Business::Bof::Data::Fw::fw_task->sequence('fw_tasksequence');
   Business::Bof::Data::Fw::fw_task->has_a(user_id => PREFIX.'::fw_user');
 
 package Business::Bof::Data::Fw::fw_taskresult;

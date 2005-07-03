@@ -1,4 +1,4 @@
-Business::Bof::Server 0.06
+Business::Bof::Server 0.07
 ==========================
 
 INSTALLATION
@@ -9,6 +9,12 @@ To install this module type the following:
    perl Build
    perl Build test
    perl Build install
+
+NOTE
+
+The Class::DBI module (Business::Bof::Data::Fw) is tweaked to work with
+SQLite right now. It shouldn't be difficult making it work with
+PostgreSQL though.
 
 SSL
 

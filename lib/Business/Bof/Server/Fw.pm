@@ -2,13 +2,12 @@ package Business::Bof::Server::Fw;
 
 use warnings;
 use strict;
-use Carp;
 use XML::Dumper;
 use Digest::MD5 qw(md5_base64);
 
 use Business::Bof::Data::Fw;
 
-our $VERSION = 0.06;
+our $VERSION = 0.07;
 
 sub new {
   my ($type, $conffile) = @_;

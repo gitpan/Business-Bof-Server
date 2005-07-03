@@ -35,7 +35,6 @@
     </item>
     <item key="fwdb" >
       <hashref>
-        <item key="level" >1</item>
         <item key="type" >SQLite</item>
         <item key="host" >localhost</item>
         <item key="name" >t/framework.sqlite</item>

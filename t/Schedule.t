@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Test::More skip_all => 'Not possible yet', tests => 3;
+use Test::More tests => 5;
 
 use lib './lib';
 
@@ -10,31 +10,31 @@ BEGIN { use_ok('Business::Bof::Server::Schedule'); };
 
   my $fw = Business::Bof::Server::Fw->new('t/bof.xml');
 
-  $fw->newFwdb();
   my %key = (
     name     => 'Freemoney',
     password => 'test'
   );
-  my $ui = $fw->getUserinfo(\%key);
+  my $ui = $fw->get_userinfo(\%key);
 
   my $sch = new Business::Bof::Server::Schedule();
-  my $scheduleId = $sch->newSchedule({
+  my $scheduleId = $sch->new_schedule({
     user_id => 1,
-    function => "class/method",
+    class => "class",
+    method => "method",
     data => 'Some schedule data'
   });
   like($scheduleId, qr/^[+‐]?\d+$/, 'New schedule');
 
   my $schData = {
     schedule_id => $scheduleId,
-    schedtype => 'D',
-    schedule => '10:00',
-    function => "subscription/calcSubscription",
+    schedule => '* * * * *',
+    class => "subscription",
+    method => "calc_subscription",
     data => "{invoicedate => 'today'}"
   };
-  my $res = $sch->updSchedule($schData);
+  my $res = $sch->upd_schedule($schData);
   is($res, 1, 'Update Task');
 
-  my $schedule = $sch->getSchedule({schedule_id => $scheduleId});
+  my $schedule = $sch->get_schedule({schedule_id => $scheduleId});
   isa_ok($schedule, 'Business::Bof::Data::Fw::fw_schedule', 'Get Schedule');
 

@@ -3,7 +3,7 @@ package Business::Bof::Server;
 use strict;
 use Carp qw( croak );
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 sub import {
   my $self = shift;

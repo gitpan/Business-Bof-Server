@@ -1,4 +1,9 @@
-2005-07-01   Kaare Rasmussen <kar at kakidata dot dk>
+2005-07-03   Kaare Rasmussen <kar at kakidata dot dk>
+
+    Release 0.07
+
+    Added schedules back into the project. This time I rely on
+    Poco::Cron. The cron syntax is well known.
 
     Release 0.06
 

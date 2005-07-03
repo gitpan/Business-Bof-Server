@@ -2,7 +2,7 @@
 -- Tables for the Business Oriented Framework
 -- Copyright (c) 2004-2005 Kaare Rasmussen
 -- This work is released under the GPL
--- $Id: create_tables_framework.sql,v 1.1 2005/05/28 19:02:11 kaare Exp $
+-- $Id: create_tables_framework.sql,v 1.2 2005/07/01 23:50:29 kaare Exp $
 
 -- Sequences
 DROP SEQUENCE fw_dbsequence;
@@ -169,28 +169,22 @@ CREATE TABLE fw_schedule (
        schedule_id          integer NOT NULL DEFAULT nextval('fw_schedulesequence')
                             PRIMARY KEY,
        title                text,
-       schedtype            text,
        schedule             text,
        user_id              integer NOT NULL REFERENCES fw_user,
-       function             text,
+       class                text,
+       method               text,
        parameters           text,
-       result               text,
-       resulttype           text,
-       lastrun              timestamp,
        updated              timestamp NOT NULL DEFAULT now()
 );
 
 COMMENT ON TABLE fw_schedule IS 'Schedules for the Business Oriented Framework';
 COMMENT ON COLUMN fw_schedule.schedule_id IS 'Unique identification';
 COMMENT ON COLUMN fw_schedule.title IS 'Title of the schedule';
-COMMENT ON COLUMN fw_schedule.schedtype IS 'The schedule type. Currently supported: "D" meaning daily at an exact time';
 COMMENT ON COLUMN fw_schedule.schedule IS 'The schedule. "hh:mm"';
 COMMENT ON COLUMN fw_schedule.user_id IS 'Reference to fw_user';
-COMMENT ON COLUMN fw_schedule.function IS 'invoice, make docs, print docs, ...';
-COMMENT ON COLUMN fw_schedule.parameters IS 'Params to the scheduled schedule';
-COMMENT ON COLUMN fw_schedule.result IS 'Result of the job';
-COMMENT ON COLUMN fw_schedule.resulttype IS 'Type of result; xml, html, etc';
-COMMENT ON COLUMN fw_schedule.lastrun IS 'Timestamp for latest execution of schedule';
+COMMENT ON COLUMN fw_schedule.class IS 'Class of scheduled method';
+COMMENT ON COLUMN fw_schedule.method IS 'Scheduled method';
+COMMENT ON COLUMN fw_schedule.parameters IS 'Paramseters for the method';
 COMMENT ON COLUMN fw_schedule.updated IS 'Timestamp for latest update of this row';
 
 -- Views

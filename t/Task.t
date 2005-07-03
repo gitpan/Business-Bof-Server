@@ -1,11 +1,10 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Test::More skip_all => 'Not possible yet', tests => 11;
+use Test::More tests => 7;
 
 use lib './lib';
 
-;
 BEGIN { 
   use_ok('Business::Bof::Server::Fw');
   use_ok('Business::Bof::Server::Task')
@@ -22,7 +21,8 @@ BEGIN {
 
   my $task_data = {
     user_id => 1,
-    function => "class/method",
+    class => "class",
+    method => "method",
     data => 'some data',
     status => 100
   };

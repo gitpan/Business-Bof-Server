@@ -2,11 +2,13 @@ package Business::Bof::Server::Schedule;
 
 use warnings;
 use strict;
+use DateTime::Event::Cron;
+use POE::Component::Cron;
 use XML::Dumper;
 
 use Business::Bof::Server qw(Fw Task);
 
-our $VERSION = 0.06;
+our $VERSION = 0.07;
 
 sub new {
   my ($type) = @_;
@@ -14,11 +16,12 @@ sub new {
   return bless $self,$type;
 }
 
-sub newSchedule {
+sub new_schedule {
   my ($self, $schedule) = @_;
   my $fwsch = Business::Bof::Data::Fw::fw_schedule->create({
     user_id => $schedule->{user_id},
-    function => $schedule->{function},
+    class => $schedule->{class},
+    method => $schedule->{method},
     title => $schedule->{title},
     parameters => pl2xml($schedule->{data}),
   });
@@ -26,7 +29,7 @@ sub newSchedule {
   my $schedule_id = $fwsch->schedule_id;
 }
 
-sub updSchedule {
+sub upd_schedule {
   my ($self,$values) = @_;
   my $fwsch = Business::Bof::Data::Fw::fw_schedule->retrieve($values->{schedule_id});
   if ($values->{data}) {
@@ -38,43 +41,29 @@ sub updSchedule {
   $fwsch->dbi_commit();
 }
 
-sub getSchedule {
+sub get_schedule {
   my ($self,$values) = @_;
   my $fwsch = Business::Bof::Data::Fw::fw_schedule->retrieve($values->{schedule_id});
   $fwsch->{data} = xml2pl($fwsch->parameters);
   return $fwsch;
 }
 
-sub getSchedulelist {
-  my ($self, $sched, $date, $time, $trunc) = @_;
-  my @schlist = Business::Bof::Data::Fw::fw_schedule->schedlist(
-    $sched, $time, $trunc, $date
-  );
-  return \@schlist;
-}
-
-sub addTask {
-  my ($self, $fwtask, $schedule) = @_;
-  my $db = $self->{db};
-  $fwtask -> newTask({
-    user_id => $schedule->user_id,
-    function => $schedule->function,
-    title => $schedule->title,
-    parameters => $schedule->parameters,
-    status => 100
-  });
-}
-
-sub dailySchedule {
-  my ($self, $date, $time) = @_;
-  my $db = $self->{db};
-  my $fwtask = new Business::Bof::Server::Task($db);
-  my $schlist = $self -> getSchedulelist('D', $date, $time, 'day');
-  for my $schedule ( @$schlist) {
-    $self -> addTask($fwtask, $schedule);
-    $schedule->lastrun("$date $time");
-    $schedule->update;
-    $schedule->dbi_commit;
+sub init_schedules {
+  my ($self,$poe_session) = @_;
+  for my $schlist (Business::Bof::Data::Fw::fw_schedule->retrieve_all) {
+    POE::Component::Cron->add(
+      $poe_session => handleSchedules => DateTime::Event::Cron->from_cron($schlist->schedule)->iterator(
+        span => DateTime::Span->from_datetimes(
+          start => DateTime->now,
+          end   => DateTime::Infinite::Future->new
+        )
+      ),
+      $schlist->title, 
+      $schlist->user_id->user_id,
+      $schlist->class,
+      $schlist->method,
+      $schlist->parameters
+    );
   }
 }
 
@@ -93,7 +82,8 @@ Business::Bof::Server::Schedule -- Schedule schedules to be run
 ##
   my $scheduleId = $sch->newSchedule({
      user_id => $user_id,
-     function => "$class/$method",
+     class => "$class",
+     method => "$method",
      data => $data
   });
   ...

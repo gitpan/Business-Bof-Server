@@ -2,7 +2,7 @@
 -- Tables for the Business Oriented Framework
 -- Copyright (c) 2004-2005 Kaare Rasmussen
 -- This work is released under the GPL
--- $Id: create_tables_framework.sql,v 1.1 2005/05/28 19:02:11 kaare Exp $
+-- $Id: create_tables_framework.sql,v 1.3 2005/07/03 07:28:48 kaare Exp $
 
 --Tables
 DROP TABLE fw_database;
@@ -81,8 +81,9 @@ CREATE TABLE fw_usermenu (
 CREATE TABLE fw_task (
        task_id              integer NOT NULL PRIMARY KEY,
        user_id              integer NOT NULL REFERENCES fw_user,
-       transaction_id       integer NOT NULL,
-       function             text,
+       transaction_id       integer,
+       class                text,
+       method               text,
        title                text,
        parameters           text,
        result               text,
@@ -91,18 +92,14 @@ CREATE TABLE fw_task (
        updated              timestamp NOT NULL DEFAULT now
 );
 
-
 CREATE TABLE fw_schedule (
        schedule_id          integer NOT NULL PRIMARY KEY,
        title                text,
-       schedtype            text,
        schedule             text,
        user_id              integer NOT NULL REFERENCES fw_user,
-       function             text,
+       class                text,
+       method               text,
        parameters           text,
-       result               text,
-       resulttype           text,
-       lastrun              timestamp,
        updated              timestamp NOT NULL DEFAULT now
 );
 

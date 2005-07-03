@@ -1,6 +1,6 @@
 ---
 name: Business::Bof::Server
-version: 0.06
+version: 0.07
 author:
   - Kaare Rasmussen <kar at kakidata.dk>
 abstract: Application Server featuring User Control and Remote Object Execution
@@ -14,6 +14,7 @@ requires:
   LWP::Protocol::https: 0
   Log::Log4perl: 0.47
   POE: 0.29
+  POE::Component::Cron: 0
   POE::Component::Server::SOAP: 1.05
   Printer: 0
   XML::Dumper: 0.71
@@ -42,25 +43,26 @@ provides:
     file: lib/Business/Bof/Data/Fw.pm
   Business::Bof::Server:
     file: lib/Business/Bof/Server.pm
+    version: 0.07
   Business::Bof::Server::CLI:
     file: lib/Business/Bof/Server/CLI.pm
-    version: 0.05
+    version: 0.07
   Business::Bof::Server::Connection:
     file: lib/Business/Bof/Server/Connection.pm
-    version: 0.05
+    version: 0.07
   Business::Bof::Server::Docprint:
     file: lib/Business/Bof/Server/Docprint.pm
-    version: 0.05
+    version: 0.07
   Business::Bof::Server::Fw:
     file: lib/Business/Bof/Server/Fw.pm
-    version: 0.05
+    version: 0.07
   Business::Bof::Server::Schedule:
     file: lib/Business/Bof/Server/Schedule.pm
-    version: 0.05
+    version: 0.07
   Business::Bof::Server::Session:
     file: lib/Business/Bof/Server/Session.pm
-    version: 0.05
+    version: 0.07
   Business::Bof::Server::Task:
     file: lib/Business/Bof/Server/Task.pm
-    version: 0.05
+    version: 0.07
 generated_by: Module::Build version 0.261

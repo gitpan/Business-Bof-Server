@@ -48,3 +48,7 @@ INSERT INTO fw_menulink (parent_id, child_id) VALUES (20, 13);
 INSERT INTO fw_menulink (parent_id, child_id) VALUES (21, 9);
 INSERT INTO fw_menulink (parent_id, child_id) VALUES (22, 14);
 INSERT INTO fw_menulink (parent_id, child_id) VALUES (22, 18);
+INSERT INTO fw_schedule (title,schedule,user_id,class,method,parameters) VALUES
+ ('Test schedule','* * * * *',1,'Business::Bof::Server::Task','run_tasks','');
+INSERT INTO fw_task (user_id,transaction_id,class,method,title,parameters,status) VALUES
+ (1,1,'test','test','Test run_tasks','',100);

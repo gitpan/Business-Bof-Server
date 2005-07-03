@@ -2,17 +2,14 @@ package Business::Bof::Server::Connection;
 
 use warnings;
 use strict;
-
-##
 use DateTime;
 use Log::Log4perl qw(get_logger :levels);
 use DBIx::Recordset;
-##
 
 use Business::Bof::Server qw(Docprint Fw Task Schedule);
 
 our ($fw, $fwtask, $logger);
-our $VERSION = 0.06;
+our $VERSION = 0.07;
 
 sub set_fw {
   $fw = shift;
@@ -200,8 +197,9 @@ sub call_method {
 
 sub instantiate {
   my $class = shift;
-  my $location       = "$class.pm";
-  require $location;
+  my $module = $class;
+  $module =~ s|::|/|g;
+  require "$module.pm";
   return $class->new(@_);
 }
 

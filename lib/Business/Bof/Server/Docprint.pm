@@ -4,7 +4,7 @@ use strict;
 use File::stat;
 use Printer;
 
-our $VERSION = 0.06;
+our $VERSION = 0.07;
 
 sub new {
   my ($type, $serverSettings) = @_;
